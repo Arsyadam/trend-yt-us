@@ -27,32 +27,12 @@ ui <-
     
     tabItems(
      tabItem(tabName = "home",
-      a(href="https://github.com/Arsyadam/trend-yt-us",icon('file-code-o')," View File ", style="background-color:#5B90BF; color:white; padding-left:30px; padding-right:30px; padding-top:10px;padding-bottom:10px;border-radius:5px;"),
+      a(href="https://github.com/Arsyadam/trend-yt-us", icon('file-code-o')," View File ", style="background-color:#5B90BF; color:white; padding-left:30px; padding-right:30px; padding-top:10px;padding-bottom:10px;border-radius:5px;"),
        div(style = "margin-bottom:3rem;",h1("Youtube Trending US Nov 2017 -Jan 2018")),
        fluidRow(
-         valueBox(value = yt %>%
-                    count(category_id) %>%
-                    arrange(-n) %>% 
-                    filter(row_number()==1) %>% 
-                    select(category_id) %>% 
-                    ungroup(), 
-                  icon = icon("fire"),
-                  subtitle = "Kategori video yang paling sering trending ",
-                  color = "blue",
-                  width = 6),
+         valueBoxOutput("valueBoxCat"),
+         valueBoxOutput("valueBoxChannel"),
          
-         valueBox(value = topChannel <- yt %>%
-                    count(channel_title) %>%
-                    arrange(-n) %>% 
-                    filter(row_number()==1) %>% 
-                    select(channel_title) %>% 
-                    ungroup(), 
-                  
-                  href = glue("https://youtube.com/{topChannel}"),
-                  icon = icon("tv"),
-                  subtitle = "Channel youtube dengan video trending paling sering",
-                  color = "red",
-                  width = 6),
          
          
        ),
@@ -72,6 +52,34 @@ ui <-
 #2. filter category
 #
 server <- function(input, output) {
+  output$valueBoxCat <- renderValueBox(
+    valueBox(value = yt %>%
+               count(category_id) %>%
+               arrange(-n) %>% 
+               head(1) %>% 
+               select(category_id) %>% 
+               ungroup(), 
+             icon = icon("fire"),
+             subtitle = "Kategori video yang paling sering trending ",
+             color = "blue",
+             width = 6)
+  )
+  
+  output$valueBoxChannel <- renderValueBox (
+    valueBox(value = topChannel <- yt %>%
+               count(channel_title) %>%
+               arrange(-n) %>% 
+               head(1) %>% 
+               select(channel_title) %>% 
+               ungroup(), 
+             
+             href = glue("https://youtube.com/{topChannel}"),
+             icon = icon("tv"),
+             subtitle = "Channel youtube dengan video trending paling sering",
+             color = "red",
+             width = 6)
+  )
+  
   output$plot1 <- renderPlotly ({
     meanViewsPlot <- 
       yt %>% 
